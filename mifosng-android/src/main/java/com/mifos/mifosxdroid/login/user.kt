@@ -1,5 +1,5 @@
 class ProvideUser{
-   val userStr = """
+   fun getUserStr = """
     {
   "username": "mifos",
   "userId": 1,
@@ -23,3 +23,4 @@ class ProvideUser{
 }
    """
 }
+l
