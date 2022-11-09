@@ -5,6 +5,8 @@
 
 package com.mifos.mifosxdroid.login;
 
+import com.mifos.mifosxdroid.login.ProvideUser;
+
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.core.content.ContextCompat;
