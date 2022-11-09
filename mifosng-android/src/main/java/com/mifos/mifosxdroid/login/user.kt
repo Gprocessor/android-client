@@ -1,5 +1,5 @@
 class ProvideUser{
-   fun getUserStr = """
+   fun getUserStr() = """
     {
   "username": "mifos",
   "userId": 1,
