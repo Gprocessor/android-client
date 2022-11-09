@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import com.google.gson.Gson;
 import com.mifos.api.BaseApiManager;
 import com.mifos.mifosxdroid.HomeActivity;
 import com.mifos.mifosxdroid.R;
