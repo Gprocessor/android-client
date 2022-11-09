@@ -1,3 +1,6 @@
+
+package com.mifos.mifosxdroid.login;
+
 class ProvideUser{
    fun getUserStr() = """
     {
