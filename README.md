@@ -21,7 +21,7 @@ Some **features** that are available in the app are:
 - Identifiers and Documents (Creation, Upload, Download and View)
 - Collection Sheet Access (Online), Datatables (View, Add/Remove Entries).
 - Offline Sync (for Clients, Centers, and Groups) and Offline Dashboard.
-- Cheker Inbox
+- Checker Inbox
 - Path Tracker
 
 ## Screenshots
