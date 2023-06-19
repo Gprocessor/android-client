@@ -11,7 +11,6 @@ This is an Android Application built on top of the [MifosX](https://mifosforge.j
 [![Coverage Status](https://coveralls.io/repos/github/openMF/android-client/badge.svg?branch=master)](https://coveralls.io/github/openMF/android-client?branch=master)
 
 
-
 Some **features** that are available in the app are:
 - Search of Clients, Client Details Viewing
 - Creating new Clients, Groups, and Centers
