@@ -3,6 +3,7 @@ package com.mifos.mifosxdroid.passcode;
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.widget.AppCompatButton
 import androidx.core.widget.NestedScrollView
 import butterknife.BindView
 import butterknife.ButterKnife
@@ -33,6 +34,20 @@ class PassCodeActivity : MifosPassCodeActivity() {
             currPassCode = it.getStringExtra(Constants.CURR_PASSWORD)
             isToUpdatePassCode = it.getBooleanExtra(Constants.IS_TO_UPDATE_PASS_CODE, false)
         }
+		        if(findViewById<AppCompatButton>(R.id.btn_save).text.equals("Login with biometric")){
+            BiometricAuthentication(this).authenticateWithBiometrics()
+        }
+        if(BiometricAuthentication(this).getBiometricCapabilities()==BiometricCapability.HAS_BIOMETRIC_AUTH){
+            val btn=findViewById<AppCompatButton>(R.id.btn_save)
+            if (btn.visibility==View.GONE){
+                btn.visibility=View.VISIBLE
+                btn.text="Login with biometric"
+                btn.setOnClickListener {
+                    BiometricAuthentication(this).authenticateWithBiometrics()
+                }
+            }
+        }
+		
     }
 
     override fun showToaster(view: View?, msg: Int) {
@@ -64,5 +79,12 @@ class PassCodeActivity : MifosPassCodeActivity() {
             }
         }
         finish()
+    }
+	
+    override fun onResume() {
+        if(findViewById<AppCompatButton>(R.id.btn_save).text.equals("Login with biometric")){
+            BiometricAuthentication(this).authenticateWithBiometrics()
+        }
+        super.onResume()
     }
 }
