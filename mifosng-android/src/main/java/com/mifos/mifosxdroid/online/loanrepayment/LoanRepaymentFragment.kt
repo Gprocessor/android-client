@@ -12,10 +12,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
+import android.widget.*
 import android.widget.AdapterView.OnItemSelectedListener
-import android.widget.ArrayAdapter
 import androidx.fragment.app.DialogFragment
+import butterknife.BindView
+import butterknife.ButterKnife
+import butterknife.OnClick
 import com.google.gson.Gson
 import com.jakewharton.fliptables.FlipTable
 import com.mifos.mifosxdroid.R
@@ -23,7 +25,6 @@ import com.mifos.mifosxdroid.core.MaterialDialog
 import com.mifos.mifosxdroid.core.MifosBaseActivity
 import com.mifos.mifosxdroid.core.MifosBaseFragment
 import com.mifos.mifosxdroid.core.util.Toaster
-import com.mifos.mifosxdroid.databinding.FragmentLoanRepaymentBinding
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker.OnDatePickListener
 import com.mifos.objects.accounts.loan.LoanRepaymentRequest
@@ -35,15 +36,65 @@ import com.mifos.utils.FragmentConstants
 import com.mifos.utils.Utils
 import javax.inject.Inject
 
-class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepaymentMvpView,
-    DialogInterface.OnClickListener {
-
-    private lateinit var binding: FragmentLoanRepaymentBinding
-
+class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepaymentMvpView, DialogInterface.OnClickListener {
     val LOG_TAG = javaClass.simpleName
 
+    @kotlin.jvm.JvmField
+    @BindView(R.id.rl_loan_repayment)
+    var rl_loan_repayment: RelativeLayout? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_clientName)
+    var tv_clientName: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_loan_product_short_name)
+    var tv_loanProductShortName: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_loanAccountNumber)
+    var tv_loanAccountNumber: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_in_arrears)
+    var tv_inArrears: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_amount_due)
+    var tv_amountDue: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_repayment_date)
+    var tv_repaymentDate: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_amount)
+    var et_amount: EditText? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_additional_payment)
+    var et_additionalPayment: EditText? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_fees)
+    var et_fees: EditText? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_total)
+    var tv_total: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.sp_payment_type)
+    var sp_paymentType: Spinner? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.bt_paynow)
+    var bt_paynow: Button? = null
+
+    @kotlin.jvm.JvmField
     @Inject
-    lateinit var mLoanRepaymentPresenter: LoanRepaymentPresenter
+    var mLoanRepaymentPresenter: LoanRepaymentPresenter? = null
+    private lateinit var rootView: View
 
     // Arguments Passed From the Loan Account Summary Fragment
     private var clientName: String? = null
@@ -56,59 +107,43 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         (activity as MifosBaseActivity).activityComponent?.inject(this)
-        arguments?.getParcelable<LoanWithAssociations>(Constants.LOAN_SUMMARY)
-            ?.let { loanWithAssociations ->
-                clientName = loanWithAssociations.clientName
-                loanAccountNumber = loanWithAssociations.accountNo
-                loanId = loanWithAssociations.id.toString()
-                loanProductName = loanWithAssociations.loanProductName
-                amountInArrears = loanWithAssociations.summary.totalOverdue
-            }
+        arguments?.getParcelable<LoanWithAssociations>(Constants.LOAN_SUMMARY)?.let {  loanWithAssociations ->
+            clientName = loanWithAssociations.clientName
+            loanAccountNumber = loanWithAssociations.accountNo
+            loanId = loanWithAssociations.id.toString()
+            loanProductName = loanWithAssociations.loanProductName
+            amountInArrears = loanWithAssociations.summary.totalOverdue
+        }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentLoanRepaymentBinding.inflate(inflater, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        rootView = inflater.inflate(R.layout.fragment_loan_repayment, container, false)
         setToolbarTitle("Loan Repayment")
-        mLoanRepaymentPresenter.attachView(this)
+        ButterKnife.bind(this, rootView)
+        mLoanRepaymentPresenter!!.attachView(this)
 
         //This Method Checking LoanRepayment made before in Offline mode or not.
         //If yes then User have to sync this first then he can able to make transaction.
         //If not then User able to make LoanRepayment in Online or Offline.
         checkLoanRepaymentStatusInDatabase()
-        return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.btPaynow.setOnClickListener {
-            onPayNowButtonClicked()
-        }
-
-        binding.btCancelPayment.setOnClickListener {
-            onCancelPaymentButtonClicked()
-        }
+        return rootView
     }
 
     override fun checkLoanRepaymentStatusInDatabase() {
         // Checking LoanRepayment Already made in Offline mode or Not.
-        mLoanRepaymentPresenter.checkDatabaseLoanRepaymentByLoanId(loanId!!.toInt())
+        mLoanRepaymentPresenter!!.checkDatabaseLoanRepaymentByLoanId(loanId!!.toInt())
     }
 
     override fun showLoanRepaymentExistInDatabase() {
         //Visibility of ParentLayout GONE, If Repayment Already made in Offline Mode
-        binding.rlLoanRepayment.visibility = View.GONE
+        rl_loan_repayment!!.visibility = View.GONE
         MaterialDialog.Builder().init(activity)
-            .setTitle(R.string.sync_previous_transaction)
-            .setMessage(R.string.dialog_message_sync_transaction)
-            .setPositiveButton(R.string.dialog_action_ok, this)
-            .setCancelable(false)
-            .createMaterialDialog()
-            .show()
+                .setTitle(R.string.sync_previous_transaction)
+                .setMessage(R.string.dialog_message_sync_transaction)
+                .setPositiveButton(R.string.dialog_action_ok, this)
+                .setCancelable(false)
+                .createMaterialDialog()
+                .show()
     }
 
     override fun onClick(dialog: DialogInterface, which: Int) {
@@ -123,66 +158,66 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
         inflateUI()
 
         // Loading PaymentOptions.
-        mLoanRepaymentPresenter.loanLoanRepaymentTemplate(loanId!!.toInt())
+        mLoanRepaymentPresenter!!.loanLoanRepaymentTemplate(loanId!!.toInt())
     }
 
     /**
      * This Method Setting UI and Initializing the Object, TextView or EditText.
      */
-    private fun inflateUI() {
-        binding.tvClientName.text = clientName
-        binding.tvLoanProductShortName.text = loanProductName
-        binding.tvLoanAccountNumber.text = loanId
-        binding.tvInArrears.text = amountInArrears.toString()
+    fun inflateUI() {
+        tv_clientName!!.text = clientName
+        tv_loanProductShortName!!.text = loanProductName
+        tv_loanAccountNumber!!.text = loanId
+        tv_inArrears!!.text = amountInArrears.toString()
 
         //Setup Form with Default Values
-        binding.etAmount.setText("0.0")
-        binding.etAmount.addTextChangedListener(object : TextWatcher {
+        et_amount!!.setText("0.0")
+        et_amount!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
                 try {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 } catch (nfe: NumberFormatException) {
-                    binding.etAmount.setText("0")
+                    et_amount!!.setText("0")
                 } finally {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 }
             }
 
             override fun afterTextChanged(editable: Editable) {}
         })
-        binding.etAdditionalPayment.setText("0.0")
-        binding.etAdditionalPayment.addTextChangedListener(object : TextWatcher {
+        et_additionalPayment!!.setText("0.0")
+        et_additionalPayment!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
                 try {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 } catch (nfe: NumberFormatException) {
-                    binding.etAdditionalPayment.setText("0")
+                    et_additionalPayment!!.setText("0")
                 } finally {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 }
             }
 
             override fun afterTextChanged(editable: Editable) {}
         })
-        binding.etFees.setText("0.0")
-        binding.etFees.addTextChangedListener(object : TextWatcher {
+        et_fees!!.setText("0.0")
+        et_fees!!.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {}
             override fun onTextChanged(charSequence: CharSequence, i: Int, i2: Int, i3: Int) {
                 try {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 } catch (nfe: NumberFormatException) {
-                    binding.etFees.setText("0")
+                    et_fees!!.setText("0")
                 } finally {
-                    binding.tvTotal.text = calculateTotal().toString()
+                    tv_total!!.text = calculateTotal().toString()
                 }
             }
 
             override fun afterTextChanged(editable: Editable) {}
         })
         inflateRepaymentDate()
-        binding.tvTotal.text = calculateTotal().toString()
+        tv_total!!.text = calculateTotal().toString()
     }
 
     /**
@@ -191,27 +226,20 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
      * @return Total of the Amount + Additional Payment + Fee Amount
      */
     fun calculateTotal(): Double {
-        return binding.etAmount.text.toString()
-            .toDouble() + binding.etAdditionalPayment.text.toString()
-            .toDouble() + binding.etFees.text.toString().toDouble()
+        return et_amount!!.text.toString().toDouble() + et_additionalPayment!!.text.toString().toDouble() + et_fees!!.text.toString().toDouble()
     }
 
     /**
      * Setting the Repayment Date
      */
-    private fun inflateRepaymentDate() {
+    fun inflateRepaymentDate() {
         mfDatePicker = MFDatePicker.newInsance(this)
-        binding.tvRepaymentDate.text = MFDatePicker.datePickedAsString
+        tv_repaymentDate!!.text = MFDatePicker.getDatePickedAsString()
         /*
             TODO Add Validation to make sure :
             1. Date Is in Correct Format
             2. Date Entered is not greater than Date Today i.e Date is not in future
-         */binding.tvRepaymentDate.setOnClickListener {
-            (mfDatePicker as MFDatePicker).show(
-                requireActivity().supportFragmentManager,
-                FragmentConstants.DFRAG_DATE_PICKER
-            )
-        }
+         */tv_repaymentDate!!.setOnClickListener { (mfDatePicker as MFDatePicker?)!!.show(requireActivity().supportFragmentManager, FragmentConstants.DFRAG_DATE_PICKER) }
     }
 
     /**
@@ -219,30 +247,21 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
      *
      * @param date Selected Date by Date picker
      */
-    override fun onDatePicked(date: String?) {
-        binding.tvRepaymentDate.text = date
+    override fun onDatePicked(date: String) {
+        tv_repaymentDate!!.text = date
     }
 
     /**
      * Submitting the LoanRepayment after setting all arguments and Displaying the Dialog
      * First, So that user make sure. He/She wanna make LoanRepayment
      */
-
-    private fun onPayNowButtonClicked() {
+    @OnClick(R.id.bt_paynow)
+    fun onPayNowButtonClicked() {
         try {
             val headers = arrayOf("Field", "Value")
-            val data = arrayOf(
-                arrayOf("Account Number", loanAccountNumber),
-                arrayOf<String?>("Repayment Date", binding.tvRepaymentDate.text.toString()),
-                arrayOf<String?>("Payment Type", binding.spPaymentType.selectedItem.toString()),
-                arrayOf<String?>("Amount", binding.etAmount.text.toString()),
-                arrayOf<String?>("Addition Payment", binding.etAdditionalPayment.text.toString()),
-                arrayOf<String?>("Fees", binding.etFees.text.toString()),
-                arrayOf<String?>("Total", calculateTotal().toString())
-            )
+            val data = arrayOf(arrayOf("Account Number", loanAccountNumber), arrayOf<String?>("Repayment Date", tv_repaymentDate!!.text.toString()), arrayOf<String?>("Payment Type", sp_paymentType!!.selectedItem.toString()), arrayOf<String?>("Amount", et_amount!!.text.toString()), arrayOf<String?>("Addition Payment", et_additionalPayment!!.text.toString()), arrayOf<String?>("Fees", et_fees!!.text.toString()), arrayOf<String?>("Total", calculateTotal().toString()))
             Log.d(LOG_TAG, FlipTable.of(headers, data))
-            val formReviewString =
-                StringBuilder().append(data[0][0].toString() + " : " + data[0][1])
+            val formReviewString = StringBuilder().append(data[0][0].toString() + " : " + data[0][1])
                     .append("\n")
                     .append(data[1][0].toString() + " : " + data[1][1])
                     .append("\n")
@@ -256,38 +275,34 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
                     .append("\n")
                     .append(data[6][0].toString() + " : " + data[6][1]).toString()
             MaterialDialog.Builder().init(activity)
-                .setTitle(R.string.review_payment)
-                .setMessage(formReviewString)
-                .setPositiveButton(
-                    R.string.dialog_action_pay_now
-                ) { dialog, which -> submitPayment() }
-                .setNegativeButton(
-                    R.string.dialog_action_back
-                ) { dialog, which -> dialog.dismiss() }
-                .createMaterialDialog()
-                .show()
+                    .setTitle(R.string.review_payment)
+                    .setMessage(formReviewString)
+                    .setPositiveButton(R.string.dialog_action_pay_now
+                    ) { dialog, which -> submitPayment() }
+                    .setNegativeButton(R.string.dialog_action_back
+                    ) { dialog, which -> dialog.dismiss() }
+                    .createMaterialDialog()
+                    .show()
         } catch (npe: NullPointerException) {
-            Toaster.show(
-                binding.root, "Please make sure every field has a value, before submitting " +
-                        "repayment!"
-            )
+            Toaster.show(rootView, "Please make sure every field has a value, before submitting " +
+                    "repayment!")
         }
     }
 
     /**
      * Cancel button on Home UI
      */
-
-    private fun onCancelPaymentButtonClicked() {
+    @OnClick(R.id.bt_cancelPayment)
+    fun onCancelPaymentButtonClicked() {
         requireActivity().supportFragmentManager.popBackStackImmediate()
     }
 
     /**
      * Submit the Final LoanRepayment
      */
-    private fun submitPayment() {
+    fun submitPayment() {
         //TODO Implement a proper builder method here
-        val dateString = binding.tvRepaymentDate.text.toString().replace("-", " ")
+        val dateString = tv_repaymentDate!!.text.toString().replace("-", " ")
         val request = LoanRepaymentRequest()
         request.accountNumber = loanAccountNumber
         request.paymentTypeId = paymentTypeOptionId.toString()
@@ -297,83 +312,68 @@ class LoanRepaymentFragment : MifosBaseFragment(), OnDatePickListener, LoanRepay
         request.transactionDate = dateString
         val builtRequest = Gson().toJson(request)
         Log.i("LOG_TAG", builtRequest)
-        mLoanRepaymentPresenter.submitPayment(loanId!!.toInt(), request)
+        mLoanRepaymentPresenter!!.submitPayment(loanId!!.toInt(), request)
     }
 
     override fun showLoanRepayTemplate(loanRepaymentTemplate: LoanRepaymentTemplate?) {
         /* Activity is null - Fragment has been detached; no need to do anything. */
         if (activity == null) return
         if (loanRepaymentTemplate != null) {
-            binding.tvAmountDue.text = loanRepaymentTemplate.amount.toString()
+            tv_amountDue!!.text = loanRepaymentTemplate.amount.toString()
             inflateRepaymentDate()
-            val listOfPaymentTypes =
-                Utils.getPaymentTypeOptions(loanRepaymentTemplate.paymentTypeOptions)
-            val paymentTypeAdapter = ArrayAdapter(
-                requireActivity(),
-                android.R.layout.simple_spinner_item, listOfPaymentTypes
-            )
+            val listOfPaymentTypes = Utils.getPaymentTypeOptions(loanRepaymentTemplate.paymentTypeOptions)
+            val paymentTypeAdapter = ArrayAdapter(requireActivity(),
+                    android.R.layout.simple_spinner_item, listOfPaymentTypes)
             paymentTypeAdapter.setDropDownViewResource(
-                android.R.layout.simple_spinner_dropdown_item
-            )
-            binding.spPaymentType.adapter = paymentTypeAdapter
-            binding.spPaymentType.onItemSelectedListener = object : OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View,
-                    position: Int,
-                    id: Long
-                ) {
+                    android.R.layout.simple_spinner_dropdown_item)
+            sp_paymentType!!.adapter = paymentTypeAdapter
+            sp_paymentType!!.onItemSelectedListener = object : OnItemSelectedListener {
+                override fun onItemSelected(parent: AdapterView<*>?, view: View, position: Int, id: Long) {
                     paymentTypeOptionId = loanRepaymentTemplate
-                        .paymentTypeOptions[position].id
+                            .paymentTypeOptions[position].id
                 }
 
                 override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
-            binding.etAmount.setText(
-                (loanRepaymentTemplate
+            et_amount!!.setText((loanRepaymentTemplate
                     .principalPortion
-                        + loanRepaymentTemplate.interestPortion).toString()
-            )
-            binding.etAdditionalPayment.setText("0.0")
-            binding.etFees.setText(
-                loanRepaymentTemplate
-                    .feeChargesPortion.toString()
-            )
+                    + loanRepaymentTemplate.interestPortion).toString())
+            et_additionalPayment!!.setText("0.0")
+            et_fees!!.setText(loanRepaymentTemplate
+                    .feeChargesPortion.toString())
         }
     }
 
     override fun showPaymentSubmittedSuccessfully(loanRepaymentResponse: LoanRepaymentResponse?) {
         if (loanRepaymentResponse != null) {
-            Toaster.show(
-                binding.root, "Payment Successful, Transaction ID = " +
-                        loanRepaymentResponse.resourceId
-            )
+            Toaster.show(rootView, "Payment Successful, Transaction ID = " +
+                    loanRepaymentResponse.resourceId)
         }
         requireActivity().supportFragmentManager.popBackStackImmediate()
     }
 
     override fun showError(errorMessage: Int) {
-        Toaster.show(binding.root, errorMessage)
+        Toaster.show(rootView, errorMessage)
     }
 
     override fun showProgressbar(b: Boolean) {
         if (b) {
-            binding.rlLoanRepayment.visibility = View.GONE
+            rl_loan_repayment!!.visibility = View.GONE
             showMifosProgressBar()
         } else {
-            binding.rlLoanRepayment.visibility = View.VISIBLE
+            rl_loan_repayment!!.visibility = View.VISIBLE
             hideMifosProgressBar()
         }
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mLoanRepaymentPresenter.detachView()
+        mLoanRepaymentPresenter!!.detachView()
     }
 
     interface OnFragmentInteractionListener
     companion object {
-        @JvmStatic
+        @kotlin.jvm.JvmStatic
         fun newInstance(loanWithAssociations: LoanWithAssociations?): LoanRepaymentFragment {
             val fragment = LoanRepaymentFragment()
             val args = Bundle()

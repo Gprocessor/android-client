@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.DialogFragment
+import butterknife.ButterKnife
 import com.mifos.mifosxdroid.R
 import com.mifos.mifosxdroid.core.MifosBaseActivity
 import com.mifos.mifosxdroid.databinding.DialogFragmentCheckerTaskFilterBinding
@@ -78,7 +79,7 @@ class CheckerTaskFilterDialogFragment : DialogFragment(), MFDatePicker.OnDatePic
         binding.spEntity.onItemSelectedListener = this
         setOnClickListeners()
         binding.tvFromDate.text = getString(R.string.select_from_date)
-        toDate = "${MFDatePicker.datePickedAsString} $TO_TIME"
+        toDate = "${MFDatePicker.getDatePickedAsString()} $TO_TIME"
         binding.tvToDate.text = toDate.substringBefore(" ")
     }
 
@@ -197,11 +198,9 @@ class CheckerTaskFilterDialogFragment : DialogFragment(), MFDatePicker.OnDatePic
         )
     }
 
-    override fun onDatePicked(date: String?) {
+    override fun onDatePicked(date: String) {
         if (mCurrentDateView === binding.tvFromDate) {
-            if (date != null) {
-                fromDate = date
-            }
+            fromDate = date
             binding.tvFromDate.text = fromDate
         } else if (mCurrentDateView === binding.tvToDate) {
             toDate = "$date $TO_TIME"
