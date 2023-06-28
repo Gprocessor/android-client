@@ -8,15 +8,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.DialogFragment
+import butterknife.BindView
+import butterknife.ButterKnife
 import butterknife.OnClick
 import com.mifos.api.GenericResponse
 import com.mifos.exceptions.RequiredFieldException
 import com.mifos.mifosxdroid.R
 import com.mifos.mifosxdroid.core.MifosBaseActivity
 import com.mifos.mifosxdroid.core.MifosBaseFragment
-import com.mifos.mifosxdroid.databinding.DialogFragmentApproveLoanBinding
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker.OnDatePickListener
 import com.mifos.objects.accounts.loan.LoanApproval
@@ -30,17 +34,40 @@ import javax.inject.Inject
  * @author nellyk
  */
 class LoanAccountApproval : MifosBaseFragment(), OnDatePickListener, LoanAccountApprovalMvpView {
-
-    private lateinit var binding: DialogFragmentApproveLoanBinding
-
     val LOG_TAG = javaClass.simpleName
 
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_loan_approval_dates)
+    var tv_loan_approval_dates: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.tv_expected_disbursement_dates)
+    var tv_expected_disbursement_dates: TextView? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.bt_approve_loan)
+    var bt_approve_loan: Button? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_approved_amount)
+    var et_approved_amount: EditText? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_transaction_amount)
+    var et_transaction_amount: EditText? = null
+
+    @kotlin.jvm.JvmField
+    @BindView(R.id.et_approval_note)
+    var et_approval_note: EditText? = null
+
+    @kotlin.jvm.JvmField
     @Inject
-    lateinit var mLoanAccountApprovalPresenter: LoanAccountApprovalPresenter
+    var mLoanAccountApprovalPresenter: LoanAccountApprovalPresenter? = null
+    lateinit var rootView: View
     private var approvalDate: String? = null
     private var disbursementDate: String? = null
     var loanAccountNumber = 0
-    private var isDisbursementDate = false
+    private var isDisbursebemntDate = false
     private var isApprovalDate = false
     private var mfDatePicker: DialogFragment? = null
     private var loanWithAssociations: LoanWithAssociations? = null
@@ -54,114 +81,83 @@ class LoanAccountApproval : MifosBaseFragment(), OnDatePickListener, LoanAccount
         setHasOptionsMenu(true)
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         // Inflate the layout for this fragment
         activity?.actionBar?.setDisplayHomeAsUpEnabled(true)
-        binding = DialogFragmentApproveLoanBinding.inflate(inflater, container, false)
-        mLoanAccountApprovalPresenter.attachView(this)
+        rootView = inflater.inflate(R.layout.dialog_fragment_approve_loan, null)
+        ButterKnife.bind(this, rootView)
+        mLoanAccountApprovalPresenter!!.attachView(this)
         showUserInterface()
-        return binding.root
+        return rootView
     }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        binding.btApproveLoan.setOnClickListener {
-            onClickApproveLoan()
-        }
-
-        binding.tvLoanApprovalDates.setOnClickListener {
-            setApprovalDate()
-        }
-
-        binding.tvExpectedDisbursementDates.setOnClickListener {
-            setDisbursementDate()
-        }
-
-    }
-
-    private fun onClickApproveLoan() {
+    @OnClick(R.id.bt_approve_loan)
+    fun onClickApproveLoan() {
         val loanApproval = LoanApproval()
-        loanApproval.note = binding.etApprovalNote.editableText.toString()
+        loanApproval.note = et_approval_note!!.editableText.toString()
         loanApproval.approvedOnDate = approvalDate
         /* Notify the user if Approved Amount &
-         * Transaction Amount field is blank */if (binding.etApprovedAmount.editableText.toString()
-                .isEmpty()
-            || binding.etTransactionAmount.editableText.toString().isEmpty()
-        ) {
-            RequiredFieldException(
-                getString(R.string.amount),
-                getString(R.string.message_field_required)
-            ).notifyUserWithToast(activity)
+         * Transaction Amount field is blank */if (et_approved_amount!!.editableText.toString().isEmpty()
+                || et_transaction_amount!!.editableText.toString().isEmpty()) {
+            RequiredFieldException(getString(R.string.amount), getString(R.string.message_field_required)).notifyUserWithToast(activity)
             return
         }
-        loanApproval.approvedLoanAmount = binding.etApprovedAmount.editableText.toString()
+        loanApproval.approvedLoanAmount = et_approved_amount!!.editableText.toString()
         loanApproval.expectedDisbursementDate = disbursementDate
         initiateLoanApproval(loanApproval)
     }
 
-
-    private fun setApprovalDate() {
+    @OnClick(R.id.tv_loan_approval_dates)
+    fun setApprovalDate() {
         isApprovalDate = true
-        mfDatePicker?.show(
-            requireActivity().supportFragmentManager,
-            FragmentConstants.DFRAG_DATE_PICKER
-        )
+        mfDatePicker!!.show(requireActivity().supportFragmentManager, FragmentConstants.DFRAG_DATE_PICKER)
     }
 
-    private fun setDisbursementDate() {
-        isDisbursementDate = true
-        mfDatePicker?.show(
-            requireActivity().supportFragmentManager,
-            FragmentConstants.DFRAG_DATE_PICKER
-        )
+    @OnClick(R.id.tv_expected_disbursement_dates)
+    fun setDisbursementDate() {
+        isDisbursebemntDate = true
+        mfDatePicker!!.show(requireActivity().supportFragmentManager, FragmentConstants.DFRAG_DATE_PICKER)
     }
 
-    private fun showApprovalDate() {
+    fun showApprovalDate() {
         approvalDate = DateHelper.getDateAsStringUsedForCollectionSheetPayload(approvalDate)
-            .replace("-", " ")
+                .replace("-", " ")
     }
 
-    private fun showDisbursebemntDate() {
+    fun showDisbursebemntDate() {
         disbursementDate = DateHelper.getDateAsStringUsedForCollectionSheetPayload(disbursementDate)
-            .replace("-", " ")
+                .replace("-", " ")
     }
 
     override fun showUserInterface() {
         mfDatePicker = MFDatePicker.newInsance(this)
-        binding.tvLoanApprovalDates.text = MFDatePicker.datePickedAsString
-        approvalDate = binding.tvLoanApprovalDates.text.toString()
-        binding.tvExpectedDisbursementDates.text = DateHelper.getDateAsString(
-            loanWithAssociations
-                ?.timeline!!.expectedDisbursementDate
-        )
-        disbursementDate = binding.tvExpectedDisbursementDates.text.toString()
+        tv_loan_approval_dates!!.text = MFDatePicker.getDatePickedAsString()
+        approvalDate = tv_loan_approval_dates!!.text.toString()
+        tv_expected_disbursement_dates!!.text = DateHelper.getDateAsString(loanWithAssociations
+                ?.getTimeline()!!.expectedDisbursementDate)
+        disbursementDate = tv_expected_disbursement_dates!!.text.toString()
         showApprovalDate()
-        binding.etApprovedAmount.setText(loanWithAssociations?.approvedPrincipal.toString())
-        binding.etTransactionAmount.setText(loanWithAssociations?.approvedPrincipal.toString())
+        et_approved_amount!!.setText(loanWithAssociations!!.approvedPrincipal.toString())
+        et_transaction_amount!!.setText(loanWithAssociations!!.approvedPrincipal.toString())
     }
 
-    override fun onDatePicked(date: String?) {
+    override fun onDatePicked(date: String) {
         if (isApprovalDate) {
-            binding.tvLoanApprovalDates.text = date
+            tv_loan_approval_dates!!.text = date
             approvalDate = date
             showApprovalDate()
             isApprovalDate = false
-        } else if (isDisbursementDate) {
-            binding.tvExpectedDisbursementDates.text = date
+        } else if (isDisbursebemntDate) {
+            tv_expected_disbursement_dates!!.text = date
             disbursementDate = date
             showDisbursebemntDate()
-            isDisbursementDate = false
+            isDisbursebemntDate = false
         }
     }
 
     private fun initiateLoanApproval(loanApproval: LoanApproval) {
-        mLoanAccountApprovalPresenter.approveLoan(loanAccountNumber, loanApproval)
+        mLoanAccountApprovalPresenter!!.approveLoan(loanAccountNumber, loanApproval)
     }
 
     override fun showLoanApproveSuccessfully(genericResponse: GenericResponse?) {
@@ -183,14 +179,12 @@ class LoanAccountApproval : MifosBaseFragment(), OnDatePickListener, LoanAccount
 
     override fun onDestroyView() {
         super.onDestroyView()
-        mLoanAccountApprovalPresenter.detachView()
+        mLoanAccountApprovalPresenter!!.detachView()
     }
 
     companion object {
-        fun newInstance(
-            loanAccountNumber: Int,
-            loanWithAssociations: LoanWithAssociations?
-        ): LoanAccountApproval {
+        fun newInstance(loanAccountNumber: Int,
+                        loanWithAssociations: LoanWithAssociations?): LoanAccountApproval {
             val loanAccountApproval = LoanAccountApproval()
             val args = Bundle()
             args.putInt(Constants.LOAN_ACCOUNT_NUMBER, loanAccountNumber)

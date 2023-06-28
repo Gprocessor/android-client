@@ -13,14 +13,16 @@ import android.widget.AdapterView.OnItemSelectedListener
 import android.widget.ArrayAdapter
 import android.widget.EditText
 import android.widget.Spinner
+import android.widget.TableLayout
 import android.widget.TableRow
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
+import butterknife.BindView
+import butterknife.ButterKnife
 import com.mifos.mifosxdroid.R
 import com.mifos.mifosxdroid.core.MifosBaseActivity
 import com.mifos.mifosxdroid.core.MifosBaseFragment
 import com.mifos.mifosxdroid.core.util.Toaster.show
-import com.mifos.mifosxdroid.databinding.FragmentClientReportDetailsBinding
 import com.mifos.mifosxdroid.online.runreports.report.ReportFragment
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker
 import com.mifos.mifosxdroid.uihelpers.MFDatePicker.OnDatePickListener
@@ -37,11 +39,26 @@ import javax.inject.Inject
  * Created by Tarun on 04-08-17.
  */
 class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePickListener {
+    @JvmField
+    @BindView(R.id.tv_report_name)
+    var tvReportName: TextView? = null
 
-    private lateinit var binding: FragmentClientReportDetailsBinding
+    @JvmField
+    @BindView(R.id.tv_report_type)
+    var tvReportType: TextView? = null
 
+    @JvmField
+    @BindView(R.id.tv_report_category)
+    var tvReportCategory: TextView? = null
+
+    @JvmField
+    @BindView(R.id.table_details)
+    var tableDetails: TableLayout? = null
+
+    @JvmField
     @Inject
-    lateinit var presenter: ReportDetailPresenter
+    var presenter: ReportDetailPresenter? = null
+    private lateinit var rootView: View
     private var reportItem: ClientReportTypeItem? = null
     private var fetchLoanOfficer = false
     private var fetchLoanProduct = false
@@ -66,21 +83,22 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
-        binding = FragmentClientReportDetailsBinding.inflate(inflater, container, false)
+    ): View? {
+        rootView = inflater.inflate(R.layout.fragment_client_report_details, container, false)
         setHasOptionsMenu(true)
-        presenter.attachView(this)
+        ButterKnife.bind(this, rootView)
+        presenter!!.attachView(this)
         reportItem = requireArguments().getParcelable(Constants.CLIENT_REPORT_ITEM)
         setUpUi()
-        return binding.root
+        return rootView
     }
 
     private fun setUpUi() {
-        binding.itemClient.tvReportName.text = reportItem?.reportName
-        binding.itemClient.tvReportCategory.text = reportItem?.reportCategory
-        binding.itemClient.tvReportType.text = reportItem?.reportType
-        val reportName = "'" + reportItem?.reportName + "'"
-        presenter.fetchFullParameterList(reportName, true)
+        tvReportName!!.text = reportItem!!.reportName
+        tvReportCategory!!.text = reportItem!!.reportCategory
+        tvReportType!!.text = reportItem!!.reportType
+        val reportName = "'" + reportItem!!.reportName + "'"
+        presenter!!.fetchFullParameterList(reportName, true)
         datePicker = MFDatePicker.newInsance(this)
     }
 
@@ -100,7 +118,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
         when (identifier) {
             Constants.LOAN_OFFICER_ID_SELECT -> {
                 spinner.tag = Constants.R_LOAN_OFFICER_ID
-                loanOfficerMap = presenter.filterIntHashMapForSpinner(
+                loanOfficerMap = presenter!!.filterIntHashMapForSpinner(
                     data.data,
                     spinnerValues
                 )
@@ -109,7 +127,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
 
             Constants.LOAN_PRODUCT_ID_SELECT -> {
                 spinner.tag = Constants.R_LOAN_PRODUCT_ID
-                loanProductMap = presenter.filterIntHashMapForSpinner(
+                loanProductMap = presenter!!.filterIntHashMapForSpinner(
                     data.data,
                     spinnerValues
                 )
@@ -118,7 +136,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
 
             Constants.LOAN_PURPOSE_ID_SELECT -> {
                 spinner.tag = Constants.R_LOAN_PURPOSE_ID
-                loanPurposeMap = presenter.filterIntHashMapForSpinner(
+                loanPurposeMap = presenter!!.filterIntHashMapForSpinner(
                     data.data,
                     spinnerValues
                 )
@@ -127,13 +145,13 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
 
             Constants.FUND_ID_SELECT -> {
                 spinner.tag = Constants.R_FUND_ID
-                fundMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                fundMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.loan_fund)
             }
 
             Constants.CURRENCY_ID_SELECT -> {
                 spinner.tag = Constants.R_CURRENCY_ID
-                currencyMap = presenter.filterStringHashMapForSpinner(
+                currencyMap = presenter!!.filterStringHashMapForSpinner(
                     data.data,
                     spinnerValues
                 )
@@ -142,31 +160,31 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
 
             Constants.OFFICE_ID_SELECT -> {
                 spinner.tag = Constants.R_OFFICE_ID
-                officeMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                officeMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.office)
             }
 
             Constants.PAR_TYPE_SELECT -> {
                 spinner.tag = Constants.R_PAR_TYPE
-                parMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                parMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.par_calculation)
             }
 
             Constants.SAVINGS_ACCOUNT_SUB_STATUS -> {
                 spinner.tag = Constants.R_SUB_STATUS
-                subStatusMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                subStatusMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.savings_acc_deposit)
             }
 
             Constants.SELECT_GL_ACCOUNT_NO -> {
                 spinner.tag = Constants.R_ACCOUNT
-                glAccountNoMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                glAccountNoMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.glaccount)
             }
 
             Constants.OBLIG_DATE_TYPE_SELECT -> {
                 spinner.tag = Constants.R_OBLIG_DATE_TYPE
-                obligDateTypeMap = presenter.filterIntHashMapForSpinner(data.data, spinnerValues)
+                obligDateTypeMap = presenter!!.filterIntHashMapForSpinner(data.data, spinnerValues)
                 tvLabel.text = getString(R.string.obligation_date_type)
             }
         }
@@ -185,21 +203,21 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
             ) {
                 if (spinner.tag.toString() == Constants.R_OFFICE_ID && fetchLoanOfficer) {
                     val officeId = officeMap!![spinner.selectedItem.toString()]!!
-                    presenter.fetchOffices(Constants.LOAN_OFFICER_ID_SELECT, officeId, true)
+                    presenter!!.fetchOffices(Constants.LOAN_OFFICER_ID_SELECT, officeId, true)
                 } else if (spinner.tag.toString() == Constants.R_CURRENCY_ID && fetchLoanProduct) {
                     val currencyId = currencyMap!![spinner.selectedItem.toString()]
-                    presenter.fetchProduct(Constants.LOAN_PRODUCT_ID_SELECT, currencyId, true)
+                    presenter!!.fetchProduct(Constants.LOAN_PRODUCT_ID_SELECT, currencyId, true)
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
-        binding.tableDetails.addView(row)
+        tableDetails!!.addView(row)
     }
 
     private fun runReport() {
-        if (binding.tableDetails.childCount < 1) {
-            show(binding.root, getString(R.string.msg_report_empty))
+        if (tableDetails!!.childCount < 1) {
+            show(rootView, getString(R.string.msg_report_empty))
         } else {
             var fundId: Int?
             var loanOfficeId: Int?
@@ -215,8 +233,8 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
 
             /* There are variable number of parameters in the request query.
               Hence, create a Map instead of hardcoding the number of
-              query parameters in the Retrofit Service.*/for (i in 0 until binding.tableDetails.childCount) {
-                val tableRow = binding.tableDetails.getChildAt(i) as TableRow
+              query parameters in the Retrofit Service.*/for (i in 0 until tableDetails!!.childCount) {
+                val tableRow = tableDetails!!.getChildAt(i) as TableRow
                 if (tableRow.getChildAt(1) is Spinner) {
                     val sp = tableRow.getChildAt(1) as Spinner
                     when (sp.tag.toString()) {
@@ -295,7 +313,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
                     map[et.tag.toString()] = et.text.toString()
                 }
             }
-            presenter.fetchRunReportWithQuery(reportItem?.reportName, map)
+            presenter!!.fetchRunReportWithQuery(reportItem!!.reportName, map)
         }
     }
 
@@ -310,15 +328,15 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
     }
 
     override fun showOffices(response: FullParameterListResponse, identifier: String) {
-        for (i in 0 until binding.tableDetails.childCount) {
-            val tableRow = binding.tableDetails.getChildAt(i) as TableRow
+        for (i in 0 until tableDetails!!.childCount) {
+            val tableRow = tableDetails!!.getChildAt(i) as TableRow
             if (tableRow.getChildAt(1) is EditText) {
                 continue
             }
             val sp = tableRow.getChildAt(1) as Spinner
             if (sp.tag.toString() == Constants.R_LOAN_OFFICER_ID) {
                 val spinnerValues = ArrayList<String>()
-                loanOfficerMap = presenter.filterIntHashMapForSpinner(
+                loanOfficerMap = presenter!!.filterIntHashMapForSpinner(
                     response.data,
                     spinnerValues
                 )
@@ -335,15 +353,15 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
     }
 
     override fun showProduct(response: FullParameterListResponse, identifier: String) {
-        for (i in 0 until binding.tableDetails.childCount) {
-            val tableRow = binding.tableDetails.getChildAt(i) as TableRow
+        for (i in 0 until tableDetails!!.childCount) {
+            val tableRow = tableDetails!!.getChildAt(i) as TableRow
             if (tableRow.getChildAt(1) is EditText) {
                 continue
             }
             val sp = tableRow.getChildAt(1) as Spinner
             if (sp.tag.toString() == Constants.R_LOAN_PRODUCT_ID) {
                 val spinnerValues = ArrayList<String>()
-                loanProductMap = presenter.filterIntHashMapForSpinner(
+                loanProductMap = presenter!!.filterIntHashMapForSpinner(
                     response.data,
                     spinnerValues
                 )
@@ -372,7 +390,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
     }
 
     override fun showError(error: String) {
-        show(binding.root, error)
+        show(rootView, error)
     }
 
     override fun showFullParameterResponse(response: FullParameterListResponse) {
@@ -388,7 +406,7 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
                 Constants.OVERDUE_X_SELECT -> addTextView(Constants.OVERDUE_X_SELECT)
                 Constants.OVERDUE_Y_SELECT -> addTextView(Constants.OVERDUE_Y_SELECT)
             }
-            presenter.fetchParameterDetails(row.row[0], true)
+            presenter!!.fetchParameterDetails(row.row[0], true)
         }
     }
 
@@ -406,51 +424,51 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
         row.addView(tvField)
         when (identifier) {
             Constants.START_DATE_SELECT -> {
-                tvField?.tag = Constants.R_START_DATE
+                tvField!!.tag = Constants.R_START_DATE
                 tvLabel.text = getString(R.string.start_date)
             }
 
             Constants.END_DATE_SELECT -> {
-                tvField?.tag = Constants.R_END_DATE
+                tvField!!.tag = Constants.R_END_DATE
                 tvLabel.text = getString(R.string.end_date)
             }
 
             Constants.SELECT_ACCOUNT -> {
-                tvField?.tag = Constants.R_ACCOUNT_NO
+                tvField!!.tag = Constants.R_ACCOUNT_NO
                 tvLabel.text = getString(R.string.enter_account_no)
             }
 
             Constants.FROM_X_SELECT -> {
-                tvField?.tag = Constants.R_FROM_X
+                tvField!!.tag = Constants.R_FROM_X
                 tvLabel.text = getString(R.string.from_x_number)
             }
 
             Constants.TO_Y_SELECT -> {
-                tvField?.tag = Constants.R_TO_Y
+                tvField!!.tag = Constants.R_TO_Y
                 tvLabel.text = getString(R.string.to_y_number)
             }
 
             Constants.OVERDUE_X_SELECT -> {
-                tvField?.tag = Constants.R_OVERDUE_X
+                tvField!!.tag = Constants.R_OVERDUE_X
                 tvLabel.text = getString(R.string.overdue_x_number)
             }
 
             Constants.OVERDUE_Y_SELECT -> {
-                tvField?.tag = Constants.R_OVERDUE_Y
+                tvField!!.tag = Constants.R_OVERDUE_Y
                 tvLabel.text = getString(R.string.overdue_y_number)
             }
         }
-        tvField?.isFocusable = false
-        tvField?.setOnClickListener { v ->
+        tvField!!.isFocusable = false
+        tvField!!.setOnClickListener { v ->
             dateField = v.tag.toString()
             if (dateField == Constants.R_START_DATE || dateField == Constants.R_END_DATE) {
-                datePicker?.show(
+                datePicker!!.show(
                     requireActivity().supportFragmentManager,
                     FragmentConstants.DFRAG_DATE_PICKER
                 )
             }
         }
-        binding.tableDetails.addView(row)
+        tableDetails!!.addView(row)
     }
 
     override fun showParameterDetails(response: FullParameterListResponse, identifier: String) {
@@ -465,9 +483,9 @@ class ReportDetailFragment : MifosBaseFragment(), ReportDetailMvpView, OnDatePic
         }
     }
 
-    override fun onDatePicked(date: String?) {
-        for (i in 0 until binding.tableDetails.childCount) {
-            val tableRow = binding.tableDetails.getChildAt(i) as TableRow
+    override fun onDatePicked(date: String) {
+        for (i in 0 until tableDetails!!.childCount) {
+            val tableRow = tableDetails!!.getChildAt(i) as TableRow
             if (tableRow.getChildAt(1) is Spinner) {
                 continue
             }
