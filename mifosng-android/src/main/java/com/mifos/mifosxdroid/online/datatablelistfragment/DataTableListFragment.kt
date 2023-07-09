@@ -198,7 +198,7 @@ class DataTableListFragment : Fragment(), DataTableListMvpView {
     private fun addDataTableInput(index: Int): HashMap<String, Any> {
         val formWidgets = listFormWidgets[index]
         val payload = HashMap<String, Any>()
-        payload[Constants.DATE_FORMAT] = "dd-mm-YYYY"
+        payload[Constants.DATE_FORMAT] = "dd-mm-yyyy"
         payload[Constants.LOCALE] = "en"
         for (formWidget in formWidgets) {
             if (formWidget.returnType == FormWidget.SCHEMA_KEY_INT) {

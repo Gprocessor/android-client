@@ -130,7 +130,7 @@ class CollectionSheetFragment : MifosBaseFragment(), CollectionSheetMvpView {
         bulkRepaymentTransactions.toArray(collectionSheetPayload.bulkRepaymentTransactions)
         collectionSheetPayload.calendarId = calendarInstanceId.toLong()
         collectionSheetPayload.transactionDate = dateOfCollection
-        collectionSheetPayload.dateFormat = "dd-MM-YYYY"
+        collectionSheetPayload.dateFormat = "dd-MM-yyyy"
 
         //Saving Collection Sheet
         centerId?.let {

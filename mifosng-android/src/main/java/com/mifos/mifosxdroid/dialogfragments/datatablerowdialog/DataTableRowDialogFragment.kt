@@ -160,7 +160,7 @@ class DataTableRowDialogFragment : DialogFragment(), DataTableRowDialogMvpView {
     private fun addDataTableInput(): HashMap<String, String> {
         val formWidgets: List<FormWidget> = listFormWidgets
         val payload = HashMap<String, String>()
-        payload[Constants.DATE_FORMAT] = "dd-mm-YYYY"
+        payload[Constants.DATE_FORMAT] = "dd-mm-yyyy"
         payload[Constants.LOCALE] = "en"
         for (formWidget in formWidgets) {
             when (formWidget.returnType) {

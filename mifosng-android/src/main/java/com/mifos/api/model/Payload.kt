@@ -6,7 +6,7 @@ package com.mifos.api.model
 
 //TODO Remove calendarId and TransactionDate from this Payload class;
 open class Payload {
-    var dateFormat = "dd MMMM YYYY"
+    var dateFormat = "dd MMMM yyyy"
     var locale = "en"
     var calendarId: Long = 0
     var transactionDate: String? = null

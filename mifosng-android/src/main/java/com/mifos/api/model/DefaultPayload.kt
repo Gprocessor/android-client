@@ -5,6 +5,6 @@ package com.mifos.api.model
  */
 
 data class DefaultPayload(
-    var dateFormat: String = "dd MMMM YYYY",
+    var dateFormat: String = "dd MMMM yyyy",
     var locale: String = "en"
 )

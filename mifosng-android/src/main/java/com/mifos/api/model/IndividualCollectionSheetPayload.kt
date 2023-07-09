@@ -13,7 +13,7 @@ data class IndividualCollectionSheetPayload(
     var actualDisbursementDate: String? = null,
     var bulkDisbursementTransactions: List<BulkRepaymentTransactions> = ArrayList(),
     var bulkSavingsDueTransactions: List<BulkRepaymentTransactions> = ArrayList(),
-    var dateFormat: String = "dd MMMM YYYY",
+    var dateFormat: String = "dd MMMM yyyy",
     var locale: String = "en",
     var transactionDate: String? = null
 ) : Parcelable {
@@ -22,7 +22,7 @@ data class IndividualCollectionSheetPayload(
         parcel.readString(),
         parcel.createTypedArrayList(BulkRepaymentTransactions.CREATOR) ?: ArrayList(),
         parcel.createTypedArrayList(BulkRepaymentTransactions.CREATOR) ?: ArrayList(),
-        parcel.readString() ?: "dd MMMM YYYY",
+        parcel.readString() ?: "dd MMMM yyyy",
         parcel.readString() ?: "en",
         parcel.readString()
     )
