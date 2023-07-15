@@ -39,9 +39,9 @@ class DatabaseHelperLoan @Inject constructor() {
             //Setting ActualDisbursement in Table
             val actualDisbursementDate = ActualDisbursementDate(
                 loanWithAssociations.id,
-                loanWithAssociations.timeline.actualDisbursementDate[0],
-                loanWithAssociations.timeline.actualDisbursementDate[1],
-                loanWithAssociations.timeline.actualDisbursementDate[2]
+                loanWithAssociations.timeline.actualDisbursementDate?.get(0),
+                loanWithAssociations.timeline.actualDisbursementDate?.get(1),
+                loanWithAssociations.timeline.actualDisbursementDate?.get(2)
             )
             timeline.actualDisburseDate = actualDisbursementDate
             loanWithAssociations.timeline = timeline
@@ -69,10 +69,10 @@ class DatabaseHelperLoan @Inject constructor() {
             if (loanWithAssociations != null) {
                 loanWithAssociations.timeline.actualDisbursementDate = listOf(
                     loanWithAssociations.timeline.actualDisburseDate
-                        .year, loanWithAssociations.timeline
-                        .actualDisburseDate.month,
+                        ?.year, loanWithAssociations.timeline
+                        .actualDisburseDate?.month,
                     loanWithAssociations
-                        .timeline.actualDisburseDate.date
+                        .timeline.actualDisburseDate?.date
                 )
             }
             Observable.just(loanWithAssociations)
@@ -148,8 +148,7 @@ class DatabaseHelperLoan @Inject constructor() {
     ): Observable<LoanRepaymentTemplate> {
         return Observable.defer {
             loanRepaymentTemplate.loanId = loanId
-            for (paymentTypeOption: PaymentTypeOption in loanRepaymentTemplate
-                .paymentTypeOptions) {
+            for (paymentTypeOption: PaymentTypeOption in loanRepaymentTemplate.paymentTypeOptions!!) {
                 paymentTypeOption.save()
             }
             loanRepaymentTemplate.save()
