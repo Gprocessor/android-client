@@ -59,7 +59,7 @@ class CreateNewGroupFragment : ProgressableFragment() {
 
     private var submissionDate: Instant = Instant.now()
     private val submissionDatePickerDialog by lazy {
-        getDatePickerDialog(submissionDate, DatePickerConstrainType.ONLY_FUTURE_DAYS) {
+        getDatePickerDialog(submissionDate, DatePickerConstrainType.NONE) {
             val formattedDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(it)
             submissionDate = Instant.ofEpochMilli(it)
             binding.submittedDateFieldContainer.editText?.setText(formattedDate)
@@ -68,7 +68,7 @@ class CreateNewGroupFragment : ProgressableFragment() {
     }
     private var activationDate: Instant = Instant.now()
     private val activationDatePickerDialog by lazy {
-        getDatePickerDialog(activationDate, DatePickerConstrainType.ONLY_FUTURE_DAYS) {
+        getDatePickerDialog(activationDate, DatePickerConstrainType.NONE) {
             val formattedDate = SimpleDateFormat("dd MM yyyy", Locale.getDefault()).format(it)
             activationDate = Instant.ofEpochMilli(it)
             binding.activateDateFieldContainer.editText?.setText(formattedDate)

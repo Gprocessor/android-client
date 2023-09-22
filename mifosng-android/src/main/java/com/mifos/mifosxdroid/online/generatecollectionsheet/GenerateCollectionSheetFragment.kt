@@ -78,7 +78,7 @@ class GenerateCollectionSheetFragment : MifosBaseFragment(),
 
     private var selectedRepaymentDate: Instant = Instant.now()
     private val datePickerDialog by lazy {
-        getDatePickerDialog(selectedRepaymentDate, DatePickerConstrainType.ONLY_FUTURE_DAYS) {
+        getDatePickerDialog(selectedRepaymentDate, DatePickerConstrainType.NONE) {
             val formattedDate = SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(it)
             selectedRepaymentDate = Instant.ofEpochMilli(it)
             binding.meetingDateFieldContainer.editText?.setText(formattedDate)

@@ -80,7 +80,7 @@ class CreateNewClientFragment : ProgressableFragment() {
 
     private var submissionDate: Instant = Instant.now()
     private val submissionDatePickerDialog by lazy {
-        getDatePickerDialog(dayOfBirthDate, DatePickerConstrainType.ONLY_FUTURE_DAYS) {
+        getDatePickerDialog(dayOfBirthDate, DatePickerConstrainType.NONE) {
             val formattedDate = SimpleDateFormat("dd MM yyyy", Locale.getDefault()).format(it)
             submissionDate = Instant.ofEpochMilli(it)
             binding.submissionDateFieldContainer.editText?.setText(formattedDate)
