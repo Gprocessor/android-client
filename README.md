@@ -2,7 +2,7 @@
 
 # Android Client for MifosX
 
-This is an Android Application built on top of the [MifosX](https://mifosforge.jira.com/wiki/spaces/MIFOSX/overview) platform and written in Java and Kotlin. It is based on Mifos X - a robust core banking platform that is developed for field officers using which they process transactions, keep track of their client’s data, center records, group details, different types of accounts (loan, savings and recurring) of the client, run reports of clients, etc. Its sole purpose is to make field operations easier and effortless. This application also provides an offline feature that allows officers to connect with clients and provide them financial support in remote areas as well.
+This is an Android Application built on top of the [MifosX](https://mifosforge.jira.com/wiki/spaces/MIFOSX/overview) platform and written in Java and Kotlin. It is based on Mifos X - a robust core banking platform that is developed for field officers using which they process transactions, keep track of their client’s data, center records, group details, different types of accounts (loan, savings and recurring) of the client, run reports of clients, etc. Its sole purpose is to make field operations easier and effortless.This application also provides an offline feature that allows officers to connect with clients and provide them financial support in remote areas as well.
 
 ### Status
 
