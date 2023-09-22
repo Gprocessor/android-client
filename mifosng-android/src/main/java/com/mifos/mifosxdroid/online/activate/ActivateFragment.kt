@@ -38,7 +38,7 @@ class ActivateFragment : MifosBaseFragment() {
     private var activateType: String? = null
     private var activationDate: Instant = Instant.now()
     private val submissionDatePickerDialog by lazy {
-        getDatePickerDialog(activationDate, DatePickerConstrainType.ONLY_FUTURE_DAYS) {
+        getDatePickerDialog(activationDate, DatePickerConstrainType.NONE) {
             val formattedDate = SimpleDateFormat("dd MM yyyy", Locale.getDefault()).format(it)
             activationDate = Instant.ofEpochMilli(it)
             binding.activateDateFieldContainer.editText?.setText(formattedDate)
